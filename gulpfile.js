@@ -4,11 +4,13 @@ var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 // var babel = require('babel-core');
 var browserify = require('browserify');
-var watchify = require('watchify');
+var source = require('vinyl-source-stream');
+
 var babelify = require('babelify');
 var fs = require('fs');
 // var BufferStream = require('./lib/buffer-stream');
-var _ = require('lodash');
+// var _ = require('lodash');
+var gutil = require('gulp-util');
 
 gulp.task('wiredep', function(){
   gulp.src('./app/index.html')
@@ -23,7 +25,7 @@ gulp.task('watch', function(){
     cwd:'app'
   }, reload);
 
-  gulp.watch('app/es6/**/*.js', ['browserify']);
+  gulp.watch('app/es6/**/*.js', ['build']);
 
 });
 
@@ -42,15 +44,15 @@ gulp.task('watch', function(){
 //   return src;
 // });
 
-var config = {
-  entryFile: './app/es6/main.js',
-  outputDir: 'app/scripts/',
-  outputFile: 'app/scripts/main.js'
-};
-
-var source = function(file) {
-  return fs.createWriteStream(file);
-};
+// var config = {
+//   entryFile: './app/es6/main.js',
+//   outputDir: 'app/scripts/',
+//   outputFile: 'app/scripts/main.js'
+// };
+//
+// var source = function(file) {
+//   return fs.createWriteStream(file);
+// };
 
 // var _ = {
 //   extend: function(dest, source) {
@@ -61,23 +63,26 @@ var source = function(file) {
 //   }
 // };
 
-var bundler = watchify(
-  browserify(config.entryFile)
-);
+// var bundler = watchify(
+//   browserify(config.entryFile)
+// );
+//
+// bundler.on('update', function(){
+//   console.log("updated");
+//   gulp.start('build');
+// })
 
-bundler.on('update', function(){
-  console.log("updated");
-  gulp.start('build');
-})
 gulp.task('build', function(){
-  return bundler
-    .transform(babelify({ loose: 'all' }))
-    .bundle()
-    .on('error', function(err){
-      console.log(err.message);
-    })
-    .pipe(source(config.outputFile));
-    // .pipe(reload({ stream: true}))
+  return browserify({
+    entries: 'app/es6/main.js',
+    debug: true
+  })
+  .transform(babelify)
+  .on('error', gutil.log)
+  .bundle()
+  .on('error', gutil.log)
+  .pipe(source('./main.js'))
+  .pipe(gulp.dest('./app/scripts/'))
 });
 
 gulp.task('serve', function(){

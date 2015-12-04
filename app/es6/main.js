@@ -1,4 +1,4 @@
-import {sum, pi} from "calc"
+import {sum, pi} from "./calc"
 class Greeter {
   constructor(msg) {
     this.message = msg;
@@ -15,5 +15,5 @@ class Greeter {
 
 window.addEventListener('load',() => {
   var cls = new Greeter('Hello World');
-  document.getElementById('content').innerHTML = cls.getGreeting();
+  document.getElementById('content').innerHTML = cls.getValue();
 }, false);
